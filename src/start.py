@@ -32,7 +32,9 @@ BROWSER_FILETYPES = {
 
 # The instructions for each browser and version
 BROWSER_INSTRUCTIONS = {
-    "firefox.3+": """Locate the cookies.sqlite file, typically found in %localappdata%\Mozilla\Firefox\Profiles\<random text>.default or %appdata%\Mozilla\Firefox\Profiles\<random text>.default"""
+    "firefox.3+": "Locate the cookies.sqlite file, typically found in \
+%localappdata%\\Mozilla\\Firefox\\Profiles\\<random text>.default \
+or %appdata%\\Mozilla\\Firefox\\Profiles\\<random text>.default"""
 }
 
 # Convert the names in the browser selection dropdown to 'short names', which
