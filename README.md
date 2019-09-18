@@ -1,7 +1,9 @@
 <img align="right" src="https://i.imgur.com/dKCZEoi.png" width="48">
 
 # google-analytics-cookie-parser
-A WIP forensics tool written in Python, for parsing Google Analytics cookies.
+A WIP forensics tool for Windows written in Python, for parsing Google Analytics cookies.
+
+### [Download latest version here](https://github.com/pbeart/google-analytics-cookie-parser/releases/latest)
 
 ### GACP currently supports:
 * Reading and parsing cookies.sqlite from Firefox v3+
