@@ -1,4 +1,9 @@
-import sqlite3, os
+"""
+Provide helper functions and classes for parsing cookies and GA cookie
+info from supported browsers
+"""
+
+import sqlite3
 from urllib.request import pathname2url
 import time
 
@@ -7,34 +12,34 @@ def create_ga_list(values, length):
 
     template = ["<not found>"] * length
 
-    for index,element in enumerate(values[:length]):
+    for index, element in enumerate(values[:length]):
         template[index] = element
     return template
 
 def try_parse_int(number):
     """
-    Try to parse a string to an int, or return the string if not possible
+    Try to parse a string or other to an int, or return the string
+    if not possible
     """
     try:
         return int(number)
-    except:
+    except (ValueError, TypeError) as _:
         return number
 
-def try_parse_epoch_datetime(datetime, format="seconds"):
+def try_parse_epoch_datetime(datetime, time_unit="seconds"):
     """
     Try to parse a string containing an epoch datetime to a nicely formatted
     output, or return the string if not possible
     """
     try:
-        converted = float(datetime) / (1.0 if format=="seconds" else 1000.0)
+        converted = float(datetime) / (1.0 if time_unit == "seconds" else 1000.0)
         try:
-            print(converted)
             return time.strftime('%Y-%m-%d %H:%M:%SZ', time.gmtime(converted))
-        except (ValueError, OSError) as e:
+        except (ValueError, OSError) as _:
             return datetime
     except ValueError:
         return datetime # Could not be parsed into a float
-    
+
 
 def ga_parse(name, value):
     """
@@ -42,19 +47,18 @@ def ga_parse(name, value):
     """
     if not "." in value:
         # If the value is nothing like we expect, we don't have any valid data
-        # so we should just pad the empty data to the right number of 
-        # None s
+        # so we should just pad the empty data to the right number of Nones
         elements = []
     else:
         elements = value.split(".")
 
-    if name=="_ga":
+    if name == "_ga":
         # Returns dots in domain, clientID, first time site visited
         padded_elements = create_ga_list(elements, 4)
         return {"value_dots_in_domain": padded_elements[0],
                 "value_client_identifier": padded_elements[2],
                 "time_first_visit": try_parse_epoch_datetime(padded_elements[3])}
-    elif name=="__utma":
+    elif name == "__utma":
         # Returns  domain hash, visitor identifier, cookie creation time,
         #          time of 2nd most recent visit, time of most recent visit,
         #          total number of visits
@@ -64,7 +68,7 @@ def ga_parse(name, value):
                 "time_2nd_most_recent_visit": try_parse_epoch_datetime(padded_elements[3]),
                 "time_most_recent_visit": try_parse_epoch_datetime(padded_elements[4]),
                 "count_visits_utma": padded_elements[5]}
-    elif name=="__utmb":
+    elif name == "__utmb":
         # Returns [domain hash, page views in current session, outbound link clicks
         #          (worth noting that this is 10-actual value),
         #          time that current session started]
@@ -73,7 +77,7 @@ def ga_parse(name, value):
                 "count_session_pageviews": padded_elements[1],
                 "count_outbound_clicks": padded_elements[2],
                 "time_session_start": try_parse_epoch_datetime(padded_elements[3])}
-    elif name=="__utmz":
+    elif name == "__utmz":
         # Returns [domain hash, last update time, number of visits,
         #          number of different types of visits (campaigns),
         #          source used to access site, adwords campaign name,
@@ -112,9 +116,10 @@ def ga_generate_table(parsed_rows, cookie_name):
                    ["Keyword used to find site", "value_search_term"]]
     }
 
-    current_headers = ["Cookie host", cookie_name+" value", "Cookie creation time"] + [pair[0] for pair in headers[cookie_name]]
+    current_headers = ["Cookie host", cookie_name+" value", "Cookie creation time"]
+    current_headers += [pair[0] for pair in headers[cookie_name]]
 
-    output = [ current_headers ]
+    output = [current_headers]
 
     for host, creation_time, value in parsed_rows:
 
@@ -125,7 +130,7 @@ def ga_generate_table(parsed_rows, cookie_name):
         columns = [host, value, try_parse_epoch_datetime(creation_time)] + values
 
         output.append(columns)
-    
+
     return output
 
 def ga_summary(inp):
@@ -134,18 +139,18 @@ def ga_summary(inp):
     format [(ga cookie name, cookie value), ...]
     """
     keys = {
-            "time_first_visit": "_ga", # First visit (from _ga)
-            "time_most_recent_visit": "__utma", # Most recent visit (from __utma)
-            "time_2nd_most_recent_visit": "__utma", # 2nd most recent visit (from __utma)
-            "count_visits_utma": "__utma", # Number of visits (from __utma)
-            "count_visits_utmz": "__utmz", # Number of visits (from __utmz)
-            "time_session_start": "__utmb", # Time most recent session was started (from __utmb)
-            "count_session_pageviews": "__utmb", # Time most recent session was started (from __utmb)
-            "value_search_term": "__utmz", # Search keyword used to find site (from __utmz)
-            "value_visit_source": "__utmz", # Source of site access (from __utmz)
-            "count_outbound_clicks": "__utmb", # 10 - Number of clicks to external links (from __utmb)
-            "value_client_identifier": "_ga", # Client identifier (from _ga)
-            "value_visitor_identifier": "__utma", # Visitor identifier (from __utma)
+        "time_first_visit": "_ga", # First visit (from _ga)
+        "time_most_recent_visit": "__utma", # Most recent visit (from __utma)
+        "time_2nd_most_recent_visit": "__utma", # 2nd most recent visit (from __utma)
+        "count_visits_utma": "__utma", # Number of visits (from __utma)
+        "count_visits_utmz": "__utmz", # Number of visits (from __utmz)
+        "time_session_start": "__utmb", # Time most recent session was started (from __utmb)
+        "count_session_pageviews": "__utmb", # Time most recent session was started (from __utmb)
+        "value_search_term": "__utmz", # Search keyword used to find site (from __utmz)
+        "value_visit_source": "__utmz", # Source of site access (from __utmz)
+        "count_outbound_clicks": "__utmb", # 10 - Number of clicks to external links (from __utmb)
+        "value_client_identifier": "_ga", # Client identifier (from _ga)
+        "value_visitor_identifier": "__utma" # Visitor identifier (from __utma)
         }
 
     output = {}
@@ -159,27 +164,54 @@ def ga_summary(inp):
     return output
 
 def get_cookie_fetcher(browser, *args, **kwargs):
+    """
+    Returns the appropriate CookieFetcher subclass for the given
+    browser shortname
+    """
+
     if browser == "firefox.3+":
         return Firefox3Fetcher(*args, **kwargs)
 
 class CookieFetcher:
+    """
+    Template CookieFetcher for browser fetchers to inherit from
+    """
+
     def __init__(self, filepath):
-        pass
+        """
+        Should be used to prepare target browser artifact to be
+        accessed and read
+        """
 
     def get_domains(self):
-        pass
+        """
+        Return a list of unique domains for which GA cookies are found
+        """
 
     def get_cookie_count(self):
-        pass
+        """
+        Return the total number of GA cookies found
+        """
 
     def get_cookies(self, cookie_name):
-        pass
+        """
+        Return a list of [(cookie host, creation time, value), ...]
+        """
 
     def get_domain_info(self, domain):
-        pass
+        """
+        Return a ga_summary-style output dict of domain specific cookie
+        information
+        """
 
 class Firefox3Fetcher(CookieFetcher):
-    def __init__(self, filepath, cookie_names=["_ga", "_utma", "_utmb","_utmz"]):
+    """
+    CookieFetcher for Firefox 3+
+    """
+    def __init__(self, filepath, cookie_names=None):
+        # pylint: disable=super-init-not-called
+        cookie_names = ["_ga", "_utma", "_utmb", "_utmz"] if cookie_names is None else cookie_names
+
         # Use a path uri to prevent sqlite from creating the
         # database, allowing us to check whether the database
         # can be read without automatically creating it
@@ -199,12 +231,13 @@ class Firefox3Fetcher(CookieFetcher):
         # Test that it is a valid database, and that the moz_cookies
         # table exists
         try:
-            self.c = self.conn.cursor()
-            self.c.execute("SELECT name FROM sqlite_master\
+            self.cursor = self.conn.cursor()
+            self.cursor.execute("SELECT name FROM sqlite_master\
                                  WHERE type='table' AND name='moz_cookies';")
             # moz_cookies table not present
-            if self.c.fetchone() == None:
-                self.error = "The selected file was a valid database but did not have the moz_cookies table"
+            if self.cursor.fetchone() is None:
+                self.error = "The selected file was a valid database\
+but did not have the moz_cookies table"
                 return
 
         except sqlite3.DatabaseError:
@@ -216,10 +249,11 @@ class Firefox3Fetcher(CookieFetcher):
         # substition template for the SQLite query
         question_marks = ",".join(["?"]*len(self.cookie_names))
         # Use the question_marks list to create the query
-        self.c.execute("SELECT DISTINCT host FROM moz_cookies WHERE name IN ({})".format(question_marks),
-                  self.cookie_names)
+        self.cursor.execute("SELECT DISTINCT host FROM moz_cookies WHERE \
+name IN ({})".format(question_marks),
+                            self.cookie_names)
 
-        results = self.c.fetchall()
+        results = self.cursor.fetchall()
         return [result[0] for result in results]
 
     def get_domain_info(self, domain):
@@ -227,24 +261,25 @@ class Firefox3Fetcher(CookieFetcher):
         # substition template for the SQLite query
         question_marks = ",".join(["?"]*len(self.cookie_names))
         # Use the question_marks list to create the query
-        self.c.execute("SELECT name,value FROM moz_cookies WHERE name IN ({}) AND host = ?".format(question_marks),
-                       self.cookie_names+[domain])
-        d = self.c.fetchall()
-        return ga_summary(d)
+        self.cursor.execute("SELECT name,value FROM moz_cookies WHERE \
+name IN ({}) AND host = ?".format(question_marks),
+                            self.cookie_names+[domain])
+        return ga_summary(self.cursor.fetchall())
 
     def get_cookies(self, cookie_name):
-        self.c.execute("SELECT host, creationTime, value FROM moz_cookies WHERE name = ?",
-                       [cookie_name])
+        self.cursor.execute("SELECT host, creationTime, value FROM moz_cookies WHERE name = ?",
+                            [cookie_name])
 
-        return ga_generate_table(self.c.fetchall(), cookie_name)
+        return ga_generate_table(self.cursor.fetchall(), cookie_name)
 
     def get_cookie_count(self):
         # Create a list with the correct number of ?s to act as a parameter
         # substition template for the SQLite query
         question_marks = ",".join(["?"]*len(self.cookie_names))
         # Use the question_marks list to create the query
-        self.c.execute("SELECT COUNT(host) FROM moz_cookies WHERE name IN ({})".format(question_marks),
-                  self.cookie_names)
+        self.cursor.execute("SELECT COUNT(host) FROM moz_cookies WHERE \
+name IN ({})".format(question_marks),
+                            self.cookie_names)
 
-        results = self.c.fetchone()
+        results = self.cursor.fetchone()
         return results[0]
