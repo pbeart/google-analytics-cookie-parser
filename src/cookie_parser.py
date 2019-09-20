@@ -6,6 +6,7 @@ info from supported browsers
 import sqlite3
 from urllib.request import pathname2url
 import time
+import csv
 
 def create_ga_list(values, length):
     """Return the list of values, padded to specified length with '<not found>'"""
@@ -204,13 +205,56 @@ class CookieFetcher:
         information
         """
 
+class CSVFetcher(CookieFetcher):
+    """
+    CookieFetcher for fetching from CSV files
+    """
+    def __init__(self, filepath, cookie_names):
+        # pylint: disable=super-init-not-called
+
+        self.cookie_names = cookie_names
+        self.error = None
+
+        with open(filepath, "rb") as csv_file:
+            self.csv_dialect = csv.Sniffer().sniff(csv_file.read(1024))
+            reader = csv.reader(csv_file, self.csv_dialect)
+
+    def find_headers(self, row):
+        keywords = {"name": ["name"],
+                    "value": ["value"],
+                    "host": ["host", "site", "domain"],
+                    "create_time": ["creation time", "create time"]}
+
+        keyword_indices = {"name": None,
+                           "value": None,
+                           "host": None,
+                           "create_time": None}
+
+        for column_index, column in enumerate(row):
+            # Header names, who have key values of None in keyword_indices,
+            # i.e. whose column index has not yet been found.
+            filtered_headers = [k for k, v in keyword_indices.items() if v == None]
+            for possible_column_name in filtered_headers:
+                # The column contains one of the keywords
+                if any([i in column for i in keywords[possible_column_name]]):
+                    keyword_indices[possible_column_name] = column_index
+
+        return keyword_indices
+
+
+    def get_domains(self):
+        reader = csv.reader(csv_file, self.csv_dialect)
+        for row in reader:
+
+
+
+
 class Firefox3Fetcher(CookieFetcher):
     """
     CookieFetcher for Firefox 3+
     """
-    def __init__(self, filepath, cookie_names=None):
+    def __init__(self, filepath, cookie_names):
         # pylint: disable=super-init-not-called
-        cookie_names = ["_ga", "_utma", "_utmb", "_utmz"] if cookie_names is None else cookie_names
 
         # Use a path uri to prevent sqlite from creating the
         # database, allowing us to check whether the database

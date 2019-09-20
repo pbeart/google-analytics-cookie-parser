@@ -345,8 +345,10 @@ was denied to {}.\n(You probably have it open in another program)".format(filena
         """
         When the process button is clicked
         """
+        cookies = ["_ga", "_utma", "_utmb", "_utmz"]
         self.parser = cookie_parser.get_cookie_fetcher(self.get_browser_name(),
-                                                       self.setting_file_input.Value)
+                                                       self.setting_file_input.Value,
+                                                       cookies)
 
         if self.parser.error is not None:
             self.show_message("Error opening file", str(self.parser.error), wx.ICON_ERROR)
