@@ -172,6 +172,8 @@ def get_cookie_fetcher(browser, *args, **kwargs):
 
     if browser == "firefox.3+":
         return Firefox3Fetcher(*args, **kwargs)
+    elif browser == "csv":
+        return CSVFetcher(*args, **kwargs)
 
 class CookieFetcher:
     """
@@ -209,31 +211,59 @@ class CSVFetcher(CookieFetcher):
     """
     CookieFetcher for fetching from CSV files
     """
-    def __init__(self, filepath, cookie_names):
+    def __init__(self, file_path, cookie_names):
         # pylint: disable=super-init-not-called
 
         self.cookie_names = cookie_names
         self.error = None
 
-        with open(filepath, "rb") as csv_file:
-            self.csv_dialect = csv.Sniffer().sniff(csv_file.read(1024))
-            reader = csv.reader(csv_file, self.csv_dialect)
+        self.file_path = file_path
+
+        with open(file_path, "r") as self.csv_file:
+            try:
+                self.csv_dialect = csv.Sniffer().sniff(self.csv_file.read(1024))
+            except csv.Error:
+                self.error = "Could not detect a valid CSV format"
+                return
+
+            self.csv_file.seek(0) # Need to reset back to start after sniffing
+
+            reader = csv.reader(self.csv_file, self.csv_dialect)
+
+            # We need to find out which columns correspond to which values, so
+            # use find_headers
+            self.header_indices = self.find_headers(next(reader))
+
+        # If any of the header names couldn't be found
+        if None in self.header_indices.values():
+            not_found = ", ".join([k for k, v in self.header_indices.items() if v is None])
+            self.error = "Could not find the column headers: {}".format(not_found)
+            return
 
     def find_headers(self, row):
+        """
+        Return a dict of the column indexes in which the fields name, value,
+        host, and create_time are found in the given header row, in the format
+        {"name": n1, "value": n2, ...}
+        """
         keywords = {"name": ["name"],
                     "value": ["value"],
                     "host": ["host", "site", "domain"],
-                    "create_time": ["creation time", "create time"]}
+                    "create_time": ["create_time", "creation time", "create time"]}
 
         keyword_indices = {"name": None,
                            "value": None,
                            "host": None,
                            "create_time": None}
 
+        # For every column in the header row, try to match it to a header name
+        # by checking if it contains any of the relevant keywords, and from
+        # this update the keyword_indices dict with the found index
+
         for column_index, column in enumerate(row):
             # Header names, who have key values of None in keyword_indices,
             # i.e. whose column index has not yet been found.
-            filtered_headers = [k for k, v in keyword_indices.items() if v == None]
+            filtered_headers = [k for k, v in keyword_indices.items() if v is None]
             for possible_column_name in filtered_headers:
                 # The column contains one of the keywords
                 if any([i in column for i in keywords[possible_column_name]]):
@@ -243,10 +273,16 @@ class CSVFetcher(CookieFetcher):
 
 
     def get_domains(self):
-        reader = csv.reader(csv_file, self.csv_dialect)
-        for row in reader:
+        with open(self.file_path, "r") as self.csv_file:
+            reader = csv.reader(self.csv_file, self.csv_dialect)
+            for row in reader:
+                pass
+        return ["moo"]
+    def get_domain_info(self, domain):
+        return ga_summary([])
 
-
+    def get_cookie_count(self):
+        return 5
 
 
 class Firefox3Fetcher(CookieFetcher):
@@ -301,6 +337,7 @@ name IN ({})".format(question_marks),
         return [result[0] for result in results]
 
     def get_domain_info(self, domain):
+        
         # Create a list with the correct number of ?s to act as a parameter
         # substition template for the SQLite query
         question_marks = ",".join(["?"]*len(self.cookie_names))
@@ -308,6 +345,7 @@ name IN ({})".format(question_marks),
         self.cursor.execute("SELECT name,value FROM moz_cookies WHERE \
 name IN ({}) AND host = ?".format(question_marks),
                             self.cookie_names+[domain])
+                            
         return ga_summary(self.cursor.fetchall())
 
     def get_cookies(self, cookie_name):

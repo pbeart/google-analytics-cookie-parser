@@ -31,20 +31,28 @@ Visitor identifier: {value_visitor_identifier} (__utma)"""
 
 # Stores the file filters of each browser and version, used when selecting a file
 BROWSER_FILETYPES = {
-    "firefox.3+": "SQLite3 files (*.sqlite)|*.sqlite"
+    "firefox.3+": "SQLite3 files (*.sqlite)|*.sqlite",
+    "csv": "CSV (comma separated values) files (*.csv)|*.csv"
 }
 
 # The instructions for each browser and version
 BROWSER_INSTRUCTIONS = {
     "firefox.3+": "Locate the cookies.sqlite file, typically found in \
-%localappdata%\\Mozilla\\Firefox\\Profiles\\<random text>.default \
-or %appdata%\\Mozilla\\Firefox\\Profiles\\<random text>.default"""
+%%localappdata%%\\Mozilla\\Firefox\\Profiles\\<random text>.default \
+or %%appdata%%\\Mozilla\\Firefox\\Profiles\\<random text>.default",
+    "csv": "Use your preferred tool to generate a .csv file, with columns \
+with headers which contain the following phrases:\n\
+Cookie Name: 'name'\n\
+Cookie Value: 'value'\n\
+Host: 'host', 'site' or 'domain'\n\
+Creation Time (optional): 'create_time', 'creation time' or 'create time'"
 }
 
 # Convert the names in the browser selection dropdown to 'short names', which
 # are independent of how the browser name and version are displayed
 BROWSER_SHORTNAMES = {
-    "Firefox v3+": "firefox.3+"
+    "Firefox v3+": "firefox.3+",
+    "CSV file": "csv"
 }
 
 # WX styles for a display textarea
@@ -90,8 +98,11 @@ class MainWindow(wx.Frame):
         settings_sizer.Add(label_browser_choice, wx.GBPosition(0, 0), **setting_sizer_args)
 
         # Browser/version dropdown
-        self.setting_browser_choice = wx.Choice(self.settings_frame, choices=["Firefox v3+"])
+        self.setting_browser_choice = wx.Choice(self.settings_frame,
+                                                choices=["Firefox v3+",
+                                                         "CSV file"])
         self.setting_browser_choice.SetSelection(0)
+        self.setting_browser_choice.Bind(wx.EVT_CHOICE, self.on_select_browser)
         settings_sizer.Add(self.setting_browser_choice, wx.GBPosition(0, 1), **setting_sizer_args)
 
         # Browser-specific instructions
@@ -275,6 +286,10 @@ class MainWindow(wx.Frame):
         info_dict = Default(self.parser.get_domain_info(domain))
 
         self.domain_info.SetValue(DOMAIN_INFO_TEMPLATE.format_map(info_dict))
+
+    def on_select_browser(self, event):
+        self.update_browser()
+        event.Skip()
 
     def on_select_domain(self, event):
         """
