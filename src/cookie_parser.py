@@ -275,15 +275,59 @@ class CSVFetcher(CookieFetcher):
     def get_domains(self):
         with open(self.file_path, "r") as self.csv_file:
             reader = csv.reader(self.csv_file, self.csv_dialect)
-            for row in reader:
-                pass
-        return ["moo"]
+
+            # Get rid of the header row from the reader
+            next(reader)
+
+            # All rows containing GA cookies
+            ga_rows = [row for row in reader\
+                       if row[self.header_indices["name"]] in self.cookie_names]
+
+            # Find all domains by getting the nth element of each row, where
+            # n is the index of the host value header from header_indices
+            all_domains = [row[self.header_indices["host"]] for row in ga_rows]
+
+            # Use set to make list unique
+            unique_domains = list(set(all_domains))
+        return unique_domains
+
     def get_domain_info(self, domain):
-        return ga_summary([])
+        with open(self.file_path, "r") as self.csv_file:
+            reader = csv.reader(self.csv_file, self.csv_dialect)
+
+            # Get rid of the header row from the reader
+            next(reader)
+
+            # Find all rows with GA cookies with this domain
+            domain_rows = [row for row in reader\
+                           if row[self.header_indices["host"]] == domain\
+                            and row[self.header_indices["name"]] in self.cookie_names]
+
+            structured_rows = [[row[self.header_indices["name"]],
+                                row[self.header_indices["value"]]] for row in domain_rows]
+        return ga_summary(structured_rows)
 
     def get_cookie_count(self):
-        return 5
+        with open(self.file_path, "r") as self.csv_file:
+            reader = csv.reader(self.csv_file, self.csv_dialect)
 
+            # All rows containing GA cookies
+            ga_rows = [row for row in reader\
+                       if row[self.header_indices["name"]] in self.cookie_names]
+            return len(ga_rows)
+
+    def get_cookies(self, cookie_name):
+        with open(self.file_path, "r") as self.csv_file:
+            reader = csv.reader(self.csv_file, self.csv_dialect)
+
+            # Create a list of lists in the form:
+            # [[Cookie host, Creation time, Value], ...]
+            structured_rows = [[row[self.header_indices["host"]],
+                                row[self.header_indices["create_time"]],
+                                row[self.header_indices["value"]]] for row in reader\
+                               if row[self.header_indices["name"]] == cookie_name]
+
+        return ga_generate_table(structured_rows, cookie_name)
 
 class Firefox3Fetcher(CookieFetcher):
     """
@@ -337,7 +381,6 @@ name IN ({})".format(question_marks),
         return [result[0] for result in results]
 
     def get_domain_info(self, domain):
-        
         # Create a list with the correct number of ?s to act as a parameter
         # substition template for the SQLite query
         question_marks = ",".join(["?"]*len(self.cookie_names))
@@ -345,10 +388,12 @@ name IN ({})".format(question_marks),
         self.cursor.execute("SELECT name,value FROM moz_cookies WHERE \
 name IN ({}) AND host = ?".format(question_marks),
                             self.cookie_names+[domain])
-                            
+
         return ga_summary(self.cursor.fetchall())
 
     def get_cookies(self, cookie_name):
+        # Create a list of lists in the form:
+        # [[Cookie host, Creation time, Value], ...]
         self.cursor.execute("SELECT host, creationTime, value FROM moz_cookies WHERE name = ?",
                             [cookie_name])
 

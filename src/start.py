@@ -288,12 +288,16 @@ class MainWindow(wx.Frame):
         self.domain_info.SetValue(DOMAIN_INFO_TEMPLATE.format_map(info_dict))
 
     def on_select_browser(self, event):
+        """
+        Called when a browser is selected from the dropdown: updates the
+        browser-specific instruction text.
+        """
         self.update_browser()
         event.Skip()
 
     def on_select_domain(self, event):
         """
-        When a new domain is selected from the dropdown we should fetch
+        When a domain is selected from the dropdown we should fetch
         its cookie info and update the domain info display
         """
         self.update_domain_info()
