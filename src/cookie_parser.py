@@ -41,6 +41,16 @@ def try_parse_epoch_datetime(datetime, time_unit="seconds"):
     except ValueError:
         return datetime # Could not be parsed into a float
 
+def try_parse_kvp(instring, key):
+    """
+    Try to parse a GA-style key-value pair string and retrieve the specified key,
+    returning <not found> if the given key is not found or if the string could
+    not be parsed
+    """
+    key_value_pairs = instring.split("|")
+    key_dict = {pair.split("=")[0]: pair.split("=")[1] for pair in key_value_pairs if "=" in pair}
+    print(key_dict)
+    return key_dict.get(key, "<not found>")
 
 def ga_parse(name, value):
     """
@@ -83,15 +93,15 @@ def ga_parse(name, value):
         #          number of different types of visits (campaigns),
         #          source used to access site, adwords campaign name,
         #          access method, keyword used to find site]
-        padded_elements = create_ga_list(elements, 8)
+        padded_elements = create_ga_list(elements, 5)
         return {"value_domain_hash": padded_elements[0],
                 "time_last_update": try_parse_epoch_datetime(padded_elements[1]),
                 "count_visits_utmz": padded_elements[2],
                 "count_visits_campaings": padded_elements[3],
-                "value_visit_source": padded_elements[4],
-                "value_adwords_campaign": padded_elements[5],
-                "value_access_method": padded_elements[6],
-                "value_search_term": padded_elements[7]}
+                "value_visit_source": try_parse_kvp(padded_elements[4], "utmscr"),
+                "value_adwords_campaign": try_parse_kvp(padded_elements[4], "utmccn"),
+                "value_access_method": try_parse_kvp(padded_elements[4],"utmcmd"),
+                "value_search_term": try_parse_kvp(padded_elements[4], "utmctr")}
 
 def ga_generate_table(parsed_rows, cookie_name):
     """

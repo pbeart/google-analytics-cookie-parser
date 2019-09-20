@@ -364,7 +364,7 @@ was denied to {}.\n(You probably have it open in another program)".format(filena
         """
         When the process button is clicked
         """
-        cookies = ["_ga", "_utma", "_utmb", "_utmz"]
+        cookies = ["_ga", "__utma", "__utmb", "__utmz"]
         self.parser = cookie_parser.get_cookie_fetcher(self.get_browser_name(),
                                                        self.setting_file_input.Value,
                                                        cookies)
