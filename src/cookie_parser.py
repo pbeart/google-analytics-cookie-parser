@@ -100,7 +100,7 @@ def ga_parse(name, value):
                 "count_visits_campaings": padded_elements[3],
                 "value_visit_source": try_parse_kvp(padded_elements[4], "utmscr"),
                 "value_adwords_campaign": try_parse_kvp(padded_elements[4], "utmccn"),
-                "value_access_method": try_parse_kvp(padded_elements[4],"utmcmd"),
+                "value_access_method": try_parse_kvp(padded_elements[4], "utmcmd"),
                 "value_search_term": try_parse_kvp(padded_elements[4], "utmctr")}
 
 def ga_generate_table(parsed_rows, cookie_name):
