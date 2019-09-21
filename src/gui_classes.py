@@ -3,6 +3,7 @@ Contains any wx GUI classe
 """
 
 import os
+import sys, traceback
 import csv
 import wx
 
@@ -61,11 +62,27 @@ TEXTCTRL_DISPLAY_STYLES = wx.ALIGN_LEFT | wx.TE_READONLY | wx.TE_MULTILINE | wx.
 # The width of the column of setting labels
 LABEL_COLUMN_WIDTH = 150
 
+def ExceptionHook(etype, value, trace):
+    """
+    Handles all raised exceptions
+    """
+    frame = wx.GetApp().GetTopWindow()
+
+    tmp = traceback.format_exception(etype, value, trace)
+    exception = "".join(tmp)
+
+    frame.show_message("Python Error", exception, wx.ICON_INFORMATION)    
+
 class MainWindow(wx.Frame):
     """
     Main application window Frame
     """
     def __init__(self, parent, title):
+
+        sys.excepthook = ExceptionHook
+
+        self.create_widgets(parent, title)
+    def create_widgets(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(500, 400))
 
         self.parser = None
