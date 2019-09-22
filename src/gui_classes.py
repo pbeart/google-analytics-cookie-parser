@@ -3,6 +3,8 @@ Contains any wx GUI classe
 """
 
 import os
+import sys, traceback
+from datetime import datetime
 import csv
 import wx
 
@@ -61,11 +63,43 @@ TEXTCTRL_DISPLAY_STYLES = wx.ALIGN_LEFT | wx.TE_READONLY | wx.TE_MULTILINE | wx.
 # The width of the column of setting labels
 LABEL_COLUMN_WIDTH = 150
 
+def ExceptionHook(etype, value, trace):
+    """
+    Handles all raised exceptions
+    """
+
+    tmp = traceback.format_exception(etype, value, trace)
+    exception = "".join(tmp)
+
+    try:
+        with open("error_log.txt", "a") as f:
+            f.write("[{}]:\n{}\n\n".format(datetime.utcnow().isoformat(),
+                                    exception))
+    except:
+        pass # If we can't write to the log then at least show the error
+
+    frame = wx.GetApp().GetTopWindow()
+    template_string = "The following error was encountered while running the \
+program:\n\n{}\nPlease submit this error message and if \
+possible the file which caused it to github.com/pbeart/\
+google-analytics-cookie-parser/"
+
+    frame.show_message("Python Error",
+                       template_string.format(exception), wx.ICON_ERROR)    
+
+
+
+
 class MainWindow(wx.Frame):
     """
     Main application window Frame
     """
     def __init__(self, parent, title):
+
+        sys.excepthook = ExceptionHook
+
+        self.create_widgets(parent, title)
+    def create_widgets(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(500, 400))
 
         self.parser = None
