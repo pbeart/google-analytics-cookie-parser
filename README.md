@@ -1,4 +1,4 @@
-<img align="right" src="https://i.imgur.com/dKCZEoi.png" width="48">
+<img align="right" src="https://raw.githubusercontent.com/pbeart/google-analytics-cookie-parser/master/docs/project_icon_1024.png" width="128">
 
 # google-analytics-cookie-parser
 A WIP forensics tool for Windows written in Python, for parsing Google Analytics cookies.
