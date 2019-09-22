@@ -4,6 +4,7 @@ Contains any wx GUI classe
 
 import os
 import sys, traceback
+from datetime import datetime
 import csv
 import wx
 
@@ -66,12 +67,28 @@ def ExceptionHook(etype, value, trace):
     """
     Handles all raised exceptions
     """
-    frame = wx.GetApp().GetTopWindow()
 
     tmp = traceback.format_exception(etype, value, trace)
     exception = "".join(tmp)
 
-    frame.show_message("Python Error", exception, wx.ICON_INFORMATION)    
+    try:
+        with open("error_log.txt", "a") as f:
+            f.write("[{}]:\n{}\n\n".format(datetime.utcnow().isoformat(),
+                                    exception))
+    except:
+        pass # If we can't write to the log then at least show the error
+
+    frame = wx.GetApp().GetTopWindow()
+    template_string = "The following error was encountered while running the \
+program:\n\n{}\nPlease submit this error message and if \
+possible the file which caused it to github.com/pbeart/\
+google-analytics-cookie-parser/"
+
+    frame.show_message("Python Error",
+                       template_string.format(exception), wx.ICON_ERROR)    
+
+
+
 
 class MainWindow(wx.Frame):
     """

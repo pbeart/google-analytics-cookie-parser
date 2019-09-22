@@ -144,7 +144,6 @@ def ga_summary(inp):
     Returns a summary dict of the ga cookie info, taking list inp of
     format [(ga cookie name, cookie value), ...]
     """
-    eeblefree()
     keys = {
         "time_first_visit": "_ga", # First visit (from _ga)
         "time_most_recent_visit": "__utma", # Most recent visit (from __utma)
