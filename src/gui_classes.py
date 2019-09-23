@@ -287,8 +287,9 @@ class MainWindow(wx.Frame):
         domain = self.setting_view_domain.GetValue()
 
         info_dict = self.parser.get_domain_info(domain)
-        
-        self.domain_info.SetValue(general_helpers.DOMAIN_INFO_TEMPLATE.format_map(info_dict))
+
+        self.domain_info.SetValue(general_helpers.format_string_default(general_helpers.DOMAIN_INFO_TEMPLATE,
+                                                                        info_dict))
 
     def on_select_browser(self, event):
         """
@@ -421,8 +422,8 @@ was denied to {}.\n(You probably have it open in another program)".format(filena
         dlg = wx.MessageDialog(self,
                                "\
 Google Analytics Cookie Parser is a forensic tool to find, parse and evaluate \
-Google Analytics cookies.\n\nIt was developed by Patrick Beart and other \
-contributors found at http://github.com/pbeart/google-analytics-cookie-parser \
+Google Analytics cookies developed by Patrick Beart \
+\n\nFind documentation and contribute at http://github.com/pbeart/google-analytics-cookie-parser \
 \n\nWith thanks to Kevin Ripa, for being such an encouraging mentor to his \
 students, without whom this tool would never have come about.",
                                "About GA Cookie Parser",
