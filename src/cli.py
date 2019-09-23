@@ -1,5 +1,5 @@
 import click
-import cookie_parser, constants
+import cookie_parser, general_helpers
 
 @click.group()
 @click.option('--input', '-i', required=True, type=click.Path(exists=True))
@@ -19,7 +19,7 @@ def cli(ctx, input, browser):
 @click.pass_context
 def get_domains(ctx):
     """
-    Handles the get-domains command
+    Returns a list of domains found in input file
     """
     click.echo("Found domains with GA cookies: ")
     for domain in ctx.obj.get_domains():
@@ -28,7 +28,9 @@ def get_domains(ctx):
 @cli.command()
 @click.option("--domain", "-d", required=True)
 @click.pass_context
-def domain_info(ctx):
-    click.echo(str(ctx))
+def domain_info(ctx, domain):
+    click.echo("Found domains with GA cookies: ")
+    resp = ctx.obj.get_domain_info(domain)
+    click.echo(str(resp))
 
 cli()

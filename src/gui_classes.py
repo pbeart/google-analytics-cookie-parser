@@ -286,10 +286,9 @@ class MainWindow(wx.Frame):
         """
         domain = self.setting_view_domain.GetValue()
 
-        formatted = general_helpers.format_string_default(general_helpers.DOMAIN_INFO_TEMPLATE,
-                                                          info_dict)
-
-        self.domain_info.SetValue(DOMAIN_INFO_TEMPLATE.format_map(info_dict))
+        info_dict = self.parser.get_domain_info(domain)
+        
+        self.domain_info.SetValue(general_helpers.DOMAIN_INFO_TEMPLATE.format_map(info_dict))
 
     def on_select_browser(self, event):
         """
