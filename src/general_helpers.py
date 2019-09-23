@@ -33,10 +33,6 @@ def format_string_default(string, dictionary, default="<not found>"):
         def __missing__(self, key):
             return default
 
-    domain = self.setting_view_domain.GetValue()
-
     # Create our dict with the format placeholder names as keys
     info_dict = Default(dictionary)
     return string.format_map(info_dict)
-
-    self.domain_info.SetValue(general_helpers.DOMAIN_INFO_TEMPLATE.format_map(info_dict))
