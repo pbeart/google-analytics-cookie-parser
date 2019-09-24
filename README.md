@@ -38,13 +38,13 @@ A WIP forensics tool for Windows written in Python, for parsing Google Analytics
 #### Viewing domain information
 + The `domain-info` command, which requires the additional parameter `-d` or `--domain`, will list a parsed version of all available information for the given domain. **The domain should be given in the format in which it is found with `list-domains`**
 
-<img src="https://raw.githubusercontent.com/pbeart/google-analytics-cookie-parser/master/docs/example_images/example_cli_list_domain_info.png">
+<img src="https://raw.githubusercontent.com/pbeart/google-analytics-cookie-parser/master/docs/example_images/example_cli_domain_info.png">
 
 #### Exporting all cookie information to .csv
 + The `export-csv` command, which requires the additional parameter `-o` or `--output` which should be a directory path of the output directory, will export all found cookie data to .csv files in the given directory. The `-f` or `--force-overwrite` option can be given to automatically overwrite files if they exist without prompting the user.
 
 
-<img src="https://raw.githubusercontent.com/pbeart/google-analytics-cookie-parser/master/docs/example_images/example_cli_list_export_csv.png">
+<img src="https://raw.githubusercontent.com/pbeart/google-analytics-cookie-parser/master/docs/example_images/example_cli_export_csv.png">
 
 ## GACP currently supports:
 * Reading and parsing cookies.sqlite from Firefox v3+ and any browser from which you can retrieve cookies as a .csv file
