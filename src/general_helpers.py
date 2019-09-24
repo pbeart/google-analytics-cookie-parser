@@ -19,6 +19,11 @@ Number of outbound clicks: {count_outbound_clicks} (__utmb)
 Client identifier: {value_client_identifier} (_ga)
 Visitor identifier: {value_visitor_identifier} (__utma)"""
 
+COOKIE_FILENAMES = {"_ga": "cookie_ga.csv",
+                     "__utma": "cookie__utma.csv",
+                     "__utmb": "cookie__utmb.csv",
+                     "__utmz": "cookie__utmz.csv"}
+
 def format_string_default(string, dictionary, default="<not found>"):
     """
     Format a string with keys in the dictionary, using default value

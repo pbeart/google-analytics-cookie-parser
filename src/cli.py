@@ -1,9 +1,11 @@
-import sys
+import sys,os
 import click
 import cookie_parser, general_helpers
 
 @click.group()
-@click.option('--input', '-i', required=True, type=click.Path(exists=True))
+@click.option('--input', '-i', required=True, type=click.Path(exists=True,
+                                                              dir_okay=False,
+                                                              writable=False))
 @click.option("--browser", "-b", required=True, type=click.Choice(["firefox.3+", "csv"]))
 @click.pass_context
 def cli(ctx, input, browser):
@@ -13,7 +15,7 @@ def cli(ctx, input, browser):
     # TODO: seperately keep track of default cookie list
     cookies = ["_ga", "__utma", "__utmb", "__utmz"]
     ctx.obj = cookie_parser.get_cookie_fetcher(browser, input, cookies)
-    if ctx.obj.error:
+    if ctx.obj.error is not None:
         click.echo(click.style(ctx.obj.error, "red"))
         sys.exit()
 
@@ -43,5 +45,30 @@ def domain_info(ctx, domain):
                                                       info_dict)
 
     click.echo(formatted)
+
+@cli.command()
+@click.option("--output", "-o", required=True, type=click.Path(exists=True,
+                                                               file_okay=False))
+@click.pass_context
+def export_csv(ctx, output):
+    """
+    Exports all found GA cookie data to the selected output directory
+    """
+    conflicts = []
+
+    # Check whether any of the files we want to write already exists
+    for filename in general_helpers.COOKIE_FILENAMES.values():
+            # If we find a conflict...
+            if os.path.exists(os.path.join(output, filename)):
+                conflicts.append(filename) # Add it to the list
+
+    if conflicts:
+        click.confirm(click.style("{} already exist(s).\n"\
+"Do you want to replace it/them?".format(", ".join(conflicts)), "yellow"),
+                     abort=True) # If they say no then end the program
+
+    
+
+
 
 cli()

@@ -320,14 +320,9 @@ class MainWindow(wx.Frame):
 
             pathname = folder_dialog.GetPath()
 
-        filenames = {"_ga": "cookie_ga.csv",
-                     "__utma": "cookie__utma.csv",
-                     "__utmb": "cookie__utmb.csv",
-                     "__utmz": "cookie__utmz.csv"}
-
         conflicts = [] # Planned export filenames which already exist in the target folder
 
-        for filename in filenames.values():
+        for filename in general_helpers.COOKIE_FILENAMES.values():
             # If we find a conflict...
             if os.path.exists(os.path.join(pathname, filename)):
                 conflicts.append(filename) # Add it to the list
@@ -342,10 +337,10 @@ class MainWindow(wx.Frame):
                 return
 
 
-        for cookie in filenames:
+        for cookie in general_helpers.COOKIE_FILENAMES:
             try:
                 with open(os.path.join(pathname,
-                                       filenames[cookie]),
+                                       general_helpers.COOKIE_FILENAMES[cookie]),
                           "w",
                           newline="\n") as csvfile:
 
