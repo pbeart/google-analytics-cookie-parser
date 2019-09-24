@@ -367,7 +367,7 @@ class MainWindow(wx.Frame):
                                   "Could not export cookies because access\
 was denied to {}.\n(You probably have it open in another program)\
 ".format(general_helpers.COOKIE_FILENAMES[cookie]),
-         wx.ICON_ERROR)
+                                  wx.ICON_ERROR)
 
                 return
 

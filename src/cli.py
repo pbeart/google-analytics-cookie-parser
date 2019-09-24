@@ -24,6 +24,8 @@ def cli(ctx, input, browser): # pylint: disable=redefined-builtin
     """
     click.echo(click.style("Processing cookie file...", "cyan"))
     cookies = ["_ga", "__utma", "__utmb", "__utmz"]
+
+    # Provide all subcommands with the parser object
     ctx.obj = cookie_parser.get_cookie_fetcher(browser, input, cookies)
     if ctx.obj.error is not None:
         click.echo(click.style(ctx.obj.error, "red"))
@@ -35,13 +37,17 @@ def info(ctx):
     """
     Shows information about parsed cookies and found domains
     """
-    click.echo(click.style("Found domains with GA cookies:\n", fg="yellow"))
-    for domain in ctx.obj.get_domains():
-        click.echo(domain)
+    cookie_count = ctx.obj.get_cookie_count()
+    domain_count = len(ctx.obj.get_domains())
+
+    info_template = "Found {} GA cookies over {} domains"
+
+    click.echo(click.style(info_template.format(cookie_count, domain_count),
+                           fg="yellow"))
 
 @cli.command()
 @click.pass_context
-def get_domains(ctx):
+def list_domains(ctx):
     """
     Shows a list of domains found in input file
     """
@@ -106,8 +112,7 @@ def export_csv(ctx, output):
 was denied to {}.\n(You probably have it open in another program)\
 ".format(general_helpers.COOKIE_FILENAMES[cookie])
 
-            click.echo(click.style(message,
-                                   "red"))
+            click.echo(click.style(message, "red"))
             return
 
     click.echo(click.style("Successfully exported cookies", "green"))
