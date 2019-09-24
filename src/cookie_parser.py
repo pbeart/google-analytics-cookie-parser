@@ -68,8 +68,9 @@ class CSVFetcher(CookieFetcher):
             try:
                 self.csv_dialect = csv.Sniffer().sniff(self.csv_file.read(1024))
             except csv.Error:
-                self.error = "Could not detect a valid CSV format"
+                self.error = "Error trying to parse .csv file"
                 return
+                
 
             self.csv_file.seek(0) # Need to reset back to start after sniffing
 
@@ -201,11 +202,11 @@ class Firefox3Fetcher(CookieFetcher):
         # table exists
         try:
             self.cursor = self.conn.cursor()
-            self.cursor.execute("SELECT name FROM sqlite_master\
-                                 WHERE type='table' AND name='moz_cookies';")
+            self.cursor.execute("SELECT name FROM sqlite_master \
+WHERE type='table' AND name='moz_cookies';")
             # moz_cookies table not present
             if self.cursor.fetchone() is None:
-                self.error = "The selected file was a valid database\
+                self.error = "The selected file was a valid database \
 but did not have the moz_cookies table"
                 return
 

@@ -1,3 +1,4 @@
+import sys
 import click
 import cookie_parser, general_helpers
 
@@ -12,7 +13,9 @@ def cli(ctx, input, browser):
     # TODO: seperately keep track of default cookie list
     cookies = ["_ga", "__utma", "__utmb", "__utmz"]
     ctx.obj = cookie_parser.get_cookie_fetcher(browser, input, cookies)
-
+    if ctx.obj.error:
+        click.echo(click.style(ctx.obj.error, "red"))
+        sys.exit()
 
 
 @cli.command()
