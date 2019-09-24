@@ -52,7 +52,7 @@ A WIP forensics tool for Windows written in Python, for parsing Google Analytics
 * Presenting all available information for a given domain
 * Exporting GA cookie information to a .csv file
 
-### GACP is currently only tested on Firefox v3+ and .csv with \_ga and \_\_utmz cookies, and as always any critical evidence should be double-checked by manually inspecting the relevant cookies
+### GACP is currently only tested on Firefox v3+ and .csv, and as always any critical evidence should be double-checked by manually inspecting the relevant cookies
 
 ## Acknowledgements
 I would like to thank Kevin Ripa, for being such an excellent instructor and mentor, and providing the inspiration to create this tool.
