@@ -1,6 +1,12 @@
-import sys,os
+import sys
+import os
+
+import csv
+
 import click
-import cookie_parser, general_helpers
+
+import cookie_parser
+import general_helpers
 
 @click.group()
 @click.option('--input', '-i', required=True, type=click.Path(exists=True,
@@ -12,7 +18,6 @@ def cli(ctx, input, browser):
     """
     Google Analytics Cookie Parser, developed by Patrick Beart.
     """
-    # TODO: seperately keep track of default cookie list
     cookies = ["_ga", "__utma", "__utmb", "__utmz"]
     ctx.obj = cookie_parser.get_cookie_fetcher(browser, input, cookies)
     if ctx.obj.error is not None:
@@ -29,7 +34,7 @@ def get_domains(ctx):
     click.echo(click.style("Found domains with GA cookies:\n", fg="yellow"))
     for domain in ctx.obj.get_domains():
         click.echo(domain)
-    
+
 
 @cli.command()
 @click.option("--domain", "-d", required=True)
@@ -58,17 +63,39 @@ def export_csv(ctx, output):
 
     # Check whether any of the files we want to write already exists
     for filename in general_helpers.COOKIE_FILENAMES.values():
-            # If we find a conflict...
-            if os.path.exists(os.path.join(output, filename)):
-                conflicts.append(filename) # Add it to the list
+        # If we find a conflict...
+        if os.path.exists(os.path.join(output, filename)):
+            conflicts.append(filename) # Add it to the list
 
     if conflicts:
         click.confirm(click.style("{} already exist(s).\n"\
 "Do you want to replace it/them?".format(", ".join(conflicts)), "yellow"),
-                     abort=True) # If they say no then end the program
+                      abort=True) # If they say no then end the program
 
-    
+    # Didn't abort
 
+    for cookie in general_helpers.COOKIE_FILENAMES:
+        try:
+            with open(os.path.join(output,
+                                   general_helpers.COOKIE_FILENAMES[cookie]),
+                      "w",
+                      newline="\n") as csvfile:
 
+                writer = csv.writer(csvfile,
+                                    delimiter=',',
+                                    quotechar='"',
+                                    quoting=csv.QUOTE_MINIMAL)
+
+                writer.writerows(ctx.obj.get_cookies(cookie))
+        except PermissionError: # Unable to write to cookie file
+            message = "Could not export cookies because access\
+was denied to {}.\n(You probably have it open in another program)\
+".format(general_helpers.COOKIE_FILENAMES[cookie])
+
+            click.echo(click.style(message,
+                                   "red"))
+            return
+
+    click.echo(click.style("Successfully exported cookies", "green"))
 
 cli()

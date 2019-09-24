@@ -3,12 +3,17 @@ Contains any wx GUI classe
 """
 
 import os
-import sys, traceback
+import sys
+
+import traceback
 from datetime import datetime
+
 import csv
+
 import wx
 
-import cookie_parser, general_helpers
+import cookie_parser
+import general_helpers
 
 # Stores the file filters of each browser and version, used when selecting a file
 BROWSER_FILETYPES = {
@@ -42,7 +47,7 @@ TEXTCTRL_DISPLAY_STYLES = wx.ALIGN_LEFT | wx.TE_READONLY | wx.TE_MULTILINE | wx.
 # The width of the column of setting labels
 LABEL_COLUMN_WIDTH = 150
 
-def ExceptionHook(etype, value, trace):
+def exception_hook(etype, value, trace):
     """
     Handles all raised exceptions
     """
@@ -51,8 +56,8 @@ def ExceptionHook(etype, value, trace):
     exception = "".join(tmp)
 
     try:
-        with open("error_log.txt", "a") as f:
-            f.write("[{}]:\n{}\n\n".format(datetime.utcnow().isoformat(),
+        with open("error_log.txt", "a") as error_log:
+            error_log.write("[{}]:\n{}\n\n".format(datetime.utcnow().isoformat(),
                                     exception))
     except:
         pass # If we can't write to the log then at least show the error
@@ -64,7 +69,7 @@ possible the file which caused it to github.com/pbeart/\
 google-analytics-cookie-parser/"
 
     frame.show_message("Python Error",
-                       template_string.format(exception), wx.ICON_ERROR)    
+                       template_string.format(exception), wx.ICON_ERROR)
 
 
 
@@ -75,10 +80,15 @@ class MainWindow(wx.Frame):
     """
     def __init__(self, parent, title):
 
-        sys.excepthook = ExceptionHook
+        sys.excepthook = exception_hook
+
+        self.parser = None
 
         self.create_widgets(parent, title)
     def create_widgets(self, parent, title):
+        """
+        Create GUI widgets
+        """
         wx.Frame.__init__(self, parent, title=title, size=(500, 400))
 
         self.parser = None
@@ -288,8 +298,10 @@ class MainWindow(wx.Frame):
 
         info_dict = self.parser.get_domain_info(domain)
 
-        self.domain_info.SetValue(general_helpers.format_string_default(general_helpers.DOMAIN_INFO_TEMPLATE,
-                                                                        info_dict))
+        formatted = general_helpers.format_string_default(general_helpers.DOMAIN_INFO_TEMPLATE,
+                                                          info_dict)
+
+        self.domain_info.SetValue(formatted)
 
     def on_select_browser(self, event):
         """
@@ -353,7 +365,7 @@ class MainWindow(wx.Frame):
             except PermissionError: # Unable to write to cookie file
                 self.show_message("Could not export cookies",
                                   "Could not export cookies because access\
-was denied to {}.\n(You probably have it open in another program)".format(filenames[cookie]),
+was denied to {}.\n(You probably have it open in another program)".format(general_helpers.COOKIE_FILENAMES[cookie]),
                                   wx.ICON_ERROR)
                 return
 
