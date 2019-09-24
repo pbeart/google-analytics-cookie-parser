@@ -3,33 +3,17 @@ Contains any wx GUI classe
 """
 
 import os
-import sys, traceback
+import sys
+
+import traceback
 from datetime import datetime
+
 import csv
+
 import wx
 
 import cookie_parser
-
-# Template for the domain info panel. We use format to substitute the parsed
-# domain cookie values in, meaning that the {format names} are actually the
-# keys of the return value of cookie_parser.ga_parse
-DOMAIN_INFO_TEMPLATE = """Domain Info: (source)
-First visit: {time_first_visit} (_ga)
-Most recent visit: {time_most_recent_visit} (__utma)
-Second most recent visit: {time_2nd_most_recent_visit} (__utma)
-Number of visits: {count_visits_utma} (__utma)
-Number of visits: {count_visits_utmz} (__utmz)
-
-Current session start: {time_session_start} (__utma)
-Pageviews in this session: {count_session_pageviews} (__utmb)
-
-Search term used: {value_search_term} (__utmz)
-Source of visit: {value_visit_source} (__utmz)
-
-Number of outbound clicks: {count_outbound_clicks} (__utmb)
-
-Client identifier: {value_client_identifier} (_ga)
-Visitor identifier: {value_visitor_identifier} (__utma)"""
+import general_helpers
 
 # Stores the file filters of each browser and version, used when selecting a file
 BROWSER_FILETYPES = {
@@ -40,14 +24,14 @@ BROWSER_FILETYPES = {
 # The instructions for each browser and version
 BROWSER_INSTRUCTIONS = {
     "firefox.3+": "Locate the cookies.sqlite file, typically found in \
-%%localappdata%%\\Mozilla\\Firefox\\Profiles\\<random text>.default \
-or %%appdata%%\\Mozilla\\Firefox\\Profiles\\<random text>.default",
+%localappdata%\\Mozilla\\Firefox\\Profiles\\<random text>.default \
+or %appdata%\\Mozilla\\Firefox\\Profiles\\<random text>.default",
     "csv": "Use your preferred tool to generate a .csv file, with columns \
 with headers which contain the following phrases:\n\
 Cookie Name: 'name'\n\
 Cookie Value: 'value'\n\
 Host: 'host', 'site' or 'domain'\n\
-Creation Time (optional): 'create_time', 'creation time' or 'create time'"
+Creation Time: 'create_time', 'creation time' or 'create time'"
 }
 
 # Convert the names in the browser selection dropdown to 'short names', which
@@ -63,7 +47,7 @@ TEXTCTRL_DISPLAY_STYLES = wx.ALIGN_LEFT | wx.TE_READONLY | wx.TE_MULTILINE | wx.
 # The width of the column of setting labels
 LABEL_COLUMN_WIDTH = 150
 
-def ExceptionHook(etype, value, trace):
+def exception_hook(etype, value, trace):
     """
     Handles all raised exceptions
     """
@@ -72,10 +56,10 @@ def ExceptionHook(etype, value, trace):
     exception = "".join(tmp)
 
     try:
-        with open("error_log.txt", "a") as f:
-            f.write("[{}]:\n{}\n\n".format(datetime.utcnow().isoformat(),
-                                    exception))
-    except:
+        with open("error_log.txt", "a") as error_log:
+            error_log.write("[{}]:\n{}\n\n".format(datetime.utcnow().isoformat(),
+                                                   exception))
+    except: # pylint: disable=bare-except
         pass # If we can't write to the log then at least show the error
 
     frame = wx.GetApp().GetTopWindow()
@@ -85,7 +69,7 @@ possible the file which caused it to github.com/pbeart/\
 google-analytics-cookie-parser/"
 
     frame.show_message("Python Error",
-                       template_string.format(exception), wx.ICON_ERROR)    
+                       template_string.format(exception), wx.ICON_ERROR)
 
 
 
@@ -94,12 +78,17 @@ class MainWindow(wx.Frame):
     """
     Main application window Frame
     """
-    def __init__(self, parent, title):
+    def __init__(self, parent, title): # pylint: disable=super-init-not-called
 
-        sys.excepthook = ExceptionHook
+        sys.excepthook = exception_hook
+
+        self.parser = None
 
         self.create_widgets(parent, title)
     def create_widgets(self, parent, title):
+        """
+        Create GUI widgets
+        """
         wx.Frame.__init__(self, parent, title=title, size=(500, 400))
 
         self.parser = None
@@ -305,21 +294,14 @@ class MainWindow(wx.Frame):
         """
         Updates the domain information with the selected domain
         """
-        class Default(dict):
-            """
-            Class inheriting from dict, whose purpose is to provide
-            the <not-found> string rather than raising when a key
-            is not found
-            """
-            def __missing__(self, key):
-                return '<not found>'
-
         domain = self.setting_view_domain.GetValue()
 
-        # Create our dict with the format placeholder names as keys
-        info_dict = Default(self.parser.get_domain_info(domain))
+        info_dict = self.parser.get_domain_info(domain)
 
-        self.domain_info.SetValue(DOMAIN_INFO_TEMPLATE.format_map(info_dict))
+        formatted = general_helpers.format_string_default(general_helpers.DOMAIN_INFO_TEMPLATE,
+                                                          info_dict)
+
+        self.domain_info.SetValue(formatted)
 
     def on_select_browser(self, event):
         """
@@ -350,14 +332,9 @@ class MainWindow(wx.Frame):
 
             pathname = folder_dialog.GetPath()
 
-        filenames = {"_ga": "cookie_ga.csv",
-                     "__utma": "cookie__utma.csv",
-                     "__utmb": "cookie__utmb.csv",
-                     "__utmz": "cookie__utmz.csv"}
-
         conflicts = [] # Planned export filenames which already exist in the target folder
 
-        for filename in filenames.values():
+        for filename in general_helpers.COOKIE_FILENAMES.values():
             # If we find a conflict...
             if os.path.exists(os.path.join(pathname, filename)):
                 conflicts.append(filename) # Add it to the list
@@ -372,10 +349,10 @@ class MainWindow(wx.Frame):
                 return
 
 
-        for cookie in filenames:
+        for cookie in general_helpers.COOKIE_FILENAMES:
             try:
                 with open(os.path.join(pathname,
-                                       filenames[cookie]),
+                                       general_helpers.COOKIE_FILENAMES[cookie]),
                           "w",
                           newline="\n") as csvfile:
 
@@ -388,8 +365,10 @@ class MainWindow(wx.Frame):
             except PermissionError: # Unable to write to cookie file
                 self.show_message("Could not export cookies",
                                   "Could not export cookies because access\
-was denied to {}.\n(You probably have it open in another program)".format(filenames[cookie]),
+was denied to {}.\n(You probably have it open in another program)\
+".format(general_helpers.COOKIE_FILENAMES[cookie]),
                                   wx.ICON_ERROR)
+
                 return
 
         self.show_message("Cookies exported", "Successfully exported cookies", wx.ICON_INFORMATION)
@@ -452,8 +431,8 @@ was denied to {}.\n(You probably have it open in another program)".format(filena
         dlg = wx.MessageDialog(self,
                                "\
 Google Analytics Cookie Parser is a forensic tool to find, parse and evaluate \
-Google Analytics cookies.\n\nIt was developed by Patrick Beart and other \
-contributors found at http://github.com/pbeart/google-analytics-cookie-parser \
+Google Analytics cookies developed by Patrick Beart \
+\n\nFind documentation and contribute at http://github.com/pbeart/google-analytics-cookie-parser \
 \n\nWith thanks to Kevin Ripa, for being such an encouraging mentor to his \
 students, without whom this tool would never have come about.",
                                "About GA Cookie Parser",

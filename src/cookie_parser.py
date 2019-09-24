@@ -68,8 +68,9 @@ class CSVFetcher(CookieFetcher):
             try:
                 self.csv_dialect = csv.Sniffer().sniff(self.csv_file.read(1024))
             except csv.Error:
-                self.error = "Could not detect a valid CSV format"
+                self.error = "Error trying to parse .csv file"
                 return
+
 
             self.csv_file.seek(0) # Need to reset back to start after sniffing
 
@@ -111,7 +112,7 @@ class CSVFetcher(CookieFetcher):
             filtered_headers = [k for k, v in keyword_indices.items() if v is None]
             for possible_column_name in filtered_headers:
                 # The column contains one of the keywords
-                if any([i in column for i in keywords[possible_column_name]]):
+                if any([i in column.lower() for i in keywords[possible_column_name]]):
                     keyword_indices[possible_column_name] = column_index
 
         return keyword_indices
@@ -201,11 +202,11 @@ class Firefox3Fetcher(CookieFetcher):
         # table exists
         try:
             self.cursor = self.conn.cursor()
-            self.cursor.execute("SELECT name FROM sqlite_master\
-                                 WHERE type='table' AND name='moz_cookies';")
+            self.cursor.execute("SELECT name FROM sqlite_master \
+WHERE type='table' AND name='moz_cookies';")
             # moz_cookies table not present
             if self.cursor.fetchone() is None:
-                self.error = "The selected file was a valid database\
+                self.error = "The selected file was a valid database \
 but did not have the moz_cookies table"
                 return
 
