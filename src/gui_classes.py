@@ -31,7 +31,7 @@ with headers which contain the following phrases:\n\
 Cookie Name: 'name'\n\
 Cookie Value: 'value'\n\
 Host: 'host', 'site' or 'domain'\n\
-Creation Time (optional): 'create_time', 'creation time' or 'create time'"
+Creation Time: 'create_time', 'creation time' or 'create time'"
 }
 
 # Convert the names in the browser selection dropdown to 'short names', which

@@ -112,7 +112,7 @@ class CSVFetcher(CookieFetcher):
             filtered_headers = [k for k, v in keyword_indices.items() if v is None]
             for possible_column_name in filtered_headers:
                 # The column contains one of the keywords
-                if any([i in column for i in keywords[possible_column_name]]):
+                if any([i in column.lower() for i in keywords[possible_column_name]]):
                     keyword_indices[possible_column_name] = column_index
 
         return keyword_indices
