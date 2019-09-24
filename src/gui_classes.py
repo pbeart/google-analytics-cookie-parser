@@ -58,8 +58,8 @@ def exception_hook(etype, value, trace):
     try:
         with open("error_log.txt", "a") as error_log:
             error_log.write("[{}]:\n{}\n\n".format(datetime.utcnow().isoformat(),
-                                    exception))
-    except:
+                                                   exception))
+    except: # pylint: disable=bare-except
         pass # If we can't write to the log then at least show the error
 
     frame = wx.GetApp().GetTopWindow()
@@ -78,7 +78,7 @@ class MainWindow(wx.Frame):
     """
     Main application window Frame
     """
-    def __init__(self, parent, title):
+    def __init__(self, parent, title): # pylint: disable=super-init-not-called
 
         sys.excepthook = exception_hook
 
@@ -365,8 +365,10 @@ class MainWindow(wx.Frame):
             except PermissionError: # Unable to write to cookie file
                 self.show_message("Could not export cookies",
                                   "Could not export cookies because access\
-was denied to {}.\n(You probably have it open in another program)".format(general_helpers.COOKIE_FILENAMES[cookie]),
-                                  wx.ICON_ERROR)
+was denied to {}.\n(You probably have it open in another program)\
+".format(general_helpers.COOKIE_FILENAMES[cookie]),
+         wx.ICON_ERROR)
+
                 return
 
         self.show_message("Cookies exported", "Successfully exported cookies", wx.ICON_INFORMATION)

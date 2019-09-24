@@ -1,3 +1,7 @@
+"""
+Becomes the executable which provides a command line interface for the parser
+"""
+
 import sys
 import os
 
@@ -14,24 +18,34 @@ import general_helpers
                                                               writable=False))
 @click.option("--browser", "-b", required=True, type=click.Choice(["firefox.3+", "csv"]))
 @click.pass_context
-def cli(ctx, input, browser):
+def cli(ctx, input, browser): # pylint: disable=redefined-builtin
     """
     Google Analytics Cookie Parser, developed by Patrick Beart.
     """
+    click.echo(click.style("Processing cookie file...", "cyan"))
     cookies = ["_ga", "__utma", "__utmb", "__utmz"]
     ctx.obj = cookie_parser.get_cookie_fetcher(browser, input, cookies)
     if ctx.obj.error is not None:
         click.echo(click.style(ctx.obj.error, "red"))
         sys.exit()
 
+@cli.command()
+@click.pass_context
+def info(ctx):
+    """
+    Shows information about parsed cookies and found domains
+    """
+    click.echo(click.style("Found domains with GA cookies:\n", fg="yellow"))
+    for domain in ctx.obj.get_domains():
+        click.echo(domain)
 
 @cli.command()
 @click.pass_context
 def get_domains(ctx):
     """
-    Returns a list of domains found in input file
+    Shows a list of domains found in input file
     """
-    click.echo(click.style("Found domains with GA cookies:\n", fg="yellow"))
+    click.echo(click.style("Found domains with GA cookies:\n", fg="cyan"))
     for domain in ctx.obj.get_domains():
         click.echo(domain)
 
@@ -43,7 +57,7 @@ def domain_info(ctx, domain):
     """
     Shows information parsed from the input file for the specified domain
     """
-    click.echo(click.style("Info found for selected domain:\n", fg="yellow"))
+    click.echo(click.style("Info found for selected domain:\n", fg="cyan"))
     info_dict = ctx.obj.get_domain_info(domain)
 
     formatted = general_helpers.format_string_default(general_helpers.DOMAIN_INFO_TEMPLATE,
@@ -98,4 +112,4 @@ was denied to {}.\n(You probably have it open in another program)\
 
     click.echo(click.style("Successfully exported cookies", "green"))
 
-cli()
+cli() # pylint: disable=no-value-for-parameter

@@ -70,7 +70,7 @@ class CSVFetcher(CookieFetcher):
             except csv.Error:
                 self.error = "Error trying to parse .csv file"
                 return
-                
+
 
             self.csv_file.seek(0) # Need to reset back to start after sniffing
 

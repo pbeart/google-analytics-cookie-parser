@@ -1,3 +1,7 @@
+"""
+Provides constants and helpers for the program
+"""
+
 # Template for the domain info panel. We use format to substitute the parsed
 # domain cookie values in, meaning that the {format names} are actually the
 # keys of the return value of cookie_parser.ga_parse
