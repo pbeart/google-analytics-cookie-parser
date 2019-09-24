@@ -74,8 +74,9 @@ def domain_info(ctx, domain):
 @cli.command()
 @click.option("--output", "-o", required=True, type=click.Path(exists=True,
                                                                file_okay=False))
+@click.option("--force-overwrite", "-f", is_flag=True, default=False)
 @click.pass_context
-def export_csv(ctx, output):
+def export_csv(ctx, output, force_overwrite):
     """
     Exports all found GA cookie data to the selected output directory
     """
@@ -87,7 +88,7 @@ def export_csv(ctx, output):
         if os.path.exists(os.path.join(output, filename)):
             conflicts.append(filename) # Add it to the list
 
-    if conflicts:
+    if conflicts and not force_overwrite:
         click.confirm(click.style("{} already exist(s).\n"\
 "Do you want to replace it/them?".format(", ".join(conflicts)), "yellow"),
                       abort=True) # If they say no then end the program
