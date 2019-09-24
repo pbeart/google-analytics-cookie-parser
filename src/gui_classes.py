@@ -24,8 +24,8 @@ BROWSER_FILETYPES = {
 # The instructions for each browser and version
 BROWSER_INSTRUCTIONS = {
     "firefox.3+": "Locate the cookies.sqlite file, typically found in \
-%%localappdata%%\\Mozilla\\Firefox\\Profiles\\<random text>.default \
-or %%appdata%%\\Mozilla\\Firefox\\Profiles\\<random text>.default",
+%localappdata%\\Mozilla\\Firefox\\Profiles\\<random text>.default \
+or %appdata%\\Mozilla\\Firefox\\Profiles\\<random text>.default",
     "csv": "Use your preferred tool to generate a .csv file, with columns \
 with headers which contain the following phrases:\n\
 Cookie Name: 'name'\n\
