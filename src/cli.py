@@ -17,6 +17,8 @@ import general_helpers
                                                               dir_okay=False,
                                                               writable=False))
 @click.option("--browser", "-b", required=True, type=click.Choice(["firefox.3+", "csv"]))
+@click.version_option(version=general_helpers.APPLICATION_VERSION,
+                      prog_name="Google Analytics Cookie Parser")
 @click.pass_context
 def cli(ctx, input, browser): # pylint: disable=redefined-builtin
     """

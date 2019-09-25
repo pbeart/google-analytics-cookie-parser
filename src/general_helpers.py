@@ -2,6 +2,8 @@
 Provides constants and helpers for the program
 """
 
+APPLICATION_VERSION = "v0.3.0"
+
 # Template for the domain info panel. We use format to substitute the parsed
 # domain cookie values in, meaning that the {format names} are actually the
 # keys of the return value of cookie_parser.ga_parse
