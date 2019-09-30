@@ -250,7 +250,6 @@ name IN ({}) AND host = ?".format(question_marks),
             row_list = list(row)
             try:
                 row_list[1] = float(row[1])/1000000 # Convert from microseconds to seconds
-                print("Converted to {}".format(row_list))
             except ValueError:
                 raise
                 pass # Could not be converted to float
