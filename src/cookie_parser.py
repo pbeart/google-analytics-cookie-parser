@@ -251,7 +251,6 @@ name IN ({}) AND host = ?".format(question_marks),
             try:
                 row_list[1] = float(row[1])/1000000 # Convert from microseconds to seconds
             except ValueError:
-                raise
                 pass # Could not be converted to float
             finally:
                 rows.append(tuple(row_list))
