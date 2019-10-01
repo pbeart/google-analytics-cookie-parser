@@ -243,7 +243,19 @@ name IN ({}) AND host = ?".format(question_marks),
         self.cursor.execute("SELECT host, creationTime, value FROM moz_cookies WHERE name = ?",
                             [cookie_name])
 
-        return parser_helpers.ga_generate_table(self.cursor.fetchall(), cookie_name)
+        rows = []
+
+        # Convert creationTime in all rows from microseconds to seconds
+        for row in self.cursor.fetchall():
+            row_list = list(row)
+            try:
+                row_list[1] = float(row[1])/1000000 # Convert from microseconds to seconds
+            except ValueError:
+                pass # Could not be converted to float
+            finally:
+                rows.append(tuple(row_list))
+
+        return parser_helpers.ga_generate_table(rows, cookie_name)
 
     def get_cookie_count(self):
         # Create a list with the correct number of ?s to act as a parameter
