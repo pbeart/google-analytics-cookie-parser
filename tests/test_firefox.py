@@ -18,7 +18,8 @@ def test_summary():
     # get_domain_info should return:
 
     expected_output = {"value_visitor_identifier": "2100671096",
-                       "time_most_recent_visit": }
+                       "time_most_recent_visit": "2019-09-20 17:31:57Z",
+                       "time_2nd_most_recent_visit": "2019-09-20 10:10:16Z"}
 
 
     print(summary)
