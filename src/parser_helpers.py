@@ -71,9 +71,9 @@ def ga_parse(name, value):
         padded_elements = create_ga_list(elements, 6)
         return {"value_domain_hash": padded_elements[0],
                 "value_visitor_identifier": padded_elements[1],
-                "time_2nd_most_recent_visit": try_parse_epoch_datetime(padded_elements[3]),
-                "time_most_recent_visit": try_parse_epoch_datetime(padded_elements[4]),
-                "count_visits_utma": padded_elements[5]}
+                "time_2nd_most_recent_visit": try_parse_epoch_datetime(padded_elements[2]),
+                "time_most_recent_visit": try_parse_epoch_datetime(padded_elements[3]),
+                "count_visits_utma": padded_elements[4]}
     elif name == "__utmb":
         # Returns [domain hash, page views in current session, outbound link clicks
         #          (worth noting that this is 10-actual value),
