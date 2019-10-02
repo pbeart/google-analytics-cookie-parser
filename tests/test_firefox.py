@@ -3,6 +3,8 @@ Integration tests designed to make sure that the output of the tool is
 forensically sound, *not* to unit test.
 """
 
+import os.path
+
 import pytest
 
 import cookie_parser
@@ -29,8 +31,11 @@ def test_export():
                "__utmz":[['Cookie host', '__utmz value', 'Cookie creation time', 'Total visits', 'Source used to access site', 'Keyword used to find site'],
                          ['.testdomain.com', '267265176.1569000717.1.1.utmcsr=visit_source|utmccn=adwords_campaign|utmcmd=access_method|utmctr=search_query', '2019-09-20 17:31:56Z', '1', 'visit_source', 'search_query']]}
 
+    # os.path.join must be used because the Travis testing environment
+    # could be WIndows or Linux
+
     parser = cookie_parser.get_cookie_fetcher("firefox.3+",
-                                              "tests\\firefox.sqlite",
+                                              os.path.join("tests","firefox.sqlite"),
                                               list(cookies.keys()))
 
     assert(parser.error == None)
@@ -57,8 +62,11 @@ def test_summary():
                          "value_access_method": "access_method",
                          "value_search_term": "search_query"}}
 
+    # os.path.join must be used because the Travis testing environment
+    # could be WIndows or Linux
+
     parser = cookie_parser.get_cookie_fetcher("firefox.3+",
-                                              "tests\\firefox.sqlite",
+                                              os.path.join("tests","firefox.sqlite"),
                                               list(cookies.keys()))
 
     assert(parser.error == None)
