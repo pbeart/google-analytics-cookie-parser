@@ -1,5 +1,6 @@
 """
-Test Firefox 3+ specific parsing functionality
+Integration tests designed to make sure that the output of the tool is
+forensically sound, *not* to unit test.
 """
 
 import pytest
