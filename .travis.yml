@@ -4,7 +4,9 @@ python:
 
 # command to install dependencies
 install:
-  - pip install -r requirements.txt
+#  - pip install -r requirements.txt
+#  - pip install https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-16.04/wxPython-4.0.6-cp37-cp37m-linux_x86_64.whl
+#  - pip install 
 # command to run tests
 script:
   - pytest
