@@ -33,6 +33,8 @@ def test_export():
                                               "tests\\firefox.sqlite",
                                               list(cookies.keys()))
 
+    assert(parser.error == None)
+
     for cookie_name in cookies:
         table = parser.get_cookies(cookie_name)
         assert(table==cookies[cookie_name])
@@ -58,6 +60,8 @@ def test_summary():
     parser = cookie_parser.get_cookie_fetcher("firefox.3+",
                                               "tests\\firefox.sqlite",
                                               list(cookies.keys()))
+
+    assert(parser.error == None)
 
     summary = parser.get_domain_info(".testdomain.com")
 
