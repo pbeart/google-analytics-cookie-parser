@@ -1,2 +1,0 @@
-wxPython==4.0.4
-Click==7.0
