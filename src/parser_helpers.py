@@ -71,9 +71,9 @@ def ga_parse(name, value):
         padded_elements = create_ga_list(elements, 6)
         return {"value_domain_hash": padded_elements[0],
                 "value_visitor_identifier": padded_elements[1],
-                "time_2nd_most_recent_visit": try_parse_epoch_datetime(padded_elements[2]),
-                "time_most_recent_visit": try_parse_epoch_datetime(padded_elements[3]),
-                "count_visits_utma": padded_elements[4]}
+                "time_2nd_most_recent_visit": try_parse_epoch_datetime(padded_elements[3]),
+                "time_most_recent_visit": try_parse_epoch_datetime(padded_elements[4]),
+                "count_visits_utma": padded_elements[5]}
     elif name == "__utmb":
         # Returns [domain hash, page views in current session, outbound link clicks
         #          (worth noting that this is 10-actual value),
@@ -92,8 +92,8 @@ def ga_parse(name, value):
         return {"value_domain_hash": padded_elements[0],
                 "time_last_update": try_parse_epoch_datetime(padded_elements[1]),
                 "count_visits_utmz": padded_elements[2],
-                "count_visits_campaings": padded_elements[3],
-                "value_visit_source": try_parse_kvp(padded_elements[4], "utmscr"),
+                "count_visits_campaigns": padded_elements[3],
+                "value_visit_source": try_parse_kvp(padded_elements[4], "utmcsr"),
                 "value_adwords_campaign": try_parse_kvp(padded_elements[4], "utmccn"),
                 "value_access_method": try_parse_kvp(padded_elements[4], "utmcmd"),
                 "value_search_term": try_parse_kvp(padded_elements[4], "utmctr")}
@@ -156,7 +156,8 @@ def ga_summary(inp):
         "value_visit_source": "__utmz", # Source of site access (from __utmz)
         "count_outbound_clicks": "__utmb", # 10 - Number of clicks to external links (from __utmb)
         "value_client_identifier": "_ga", # Client identifier (from _ga)
-        "value_visitor_identifier": "__utma" # Visitor identifier (from __utma)
+        "value_visitor_identifier": "__utma", # Visitor identifier (from __utma)
+        "value_access_method": "__utmz" # Access method (from __utmz)
         }
 
     output = {}
